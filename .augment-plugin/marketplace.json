@@ -1,0 +1,18 @@
+{
+  "name": "auggie-warp",
+  "description": "Official Warp terminal integrations for Auggie",
+  "owner": {
+    "name": "Warp",
+    "url": "https://warp.dev"
+  },
+  "plugins": [
+    {
+      "name": "warp",
+      "description": "Native Warp notifications when Auggie completes tasks or needs input",
+      "source": "./plugins/warp",
+      "version": "2.0.0",
+      "category": "productivity",
+      "tags": ["notifications", "terminal", "warp"]
+    }
+  ]
+}
