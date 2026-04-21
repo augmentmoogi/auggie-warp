@@ -1,5 +1,22 @@
 # Auggie + Warp
 
+> ⚠️ **Spoofed Agent Name**
+>
+> Warp currently only recognises `claude` as a CLI agent identifier. Until Warp
+> adds `auggie` to its allowlist, every notification is sent **twice** — once as
+> `auggie` and once as `claude` — so that Warp's status indicators work.
+>
+> **To remove the spoof:** edit every `for _agent in auggie claude; do` loop in
+> the hook scripts under `plugins/warp/scripts/` and change it to
+> `for _agent in auggie; do`. The affected files are:
+> - `plugins/warp/scripts/on-session-start.sh`
+> - `plugins/warp/scripts/on-stop.sh`
+> - `plugins/warp/scripts/on-pre-tool-use.sh`
+> - `plugins/warp/scripts/on-notification.sh`
+>
+> `plugins/warp/scripts/on-post-tool-use.sh` currently only sends as the
+> default agent (`auggie`).
+
 Official [Warp](https://warp.dev) terminal integration for [Auggie](https://docs.anthropic.com/en/docs/auggie).
 
 ## Features
@@ -84,17 +101,15 @@ Then restart Auggie (or run `/reload-plugins`).
 
 ### Enable debug logs
 
-Set `AUGGIE_WARP_DEBUG=1` before launching Auggie to have every hook
-invocation append a line to the debug log:
+The legacy scripts under `plugins/warp/scripts/legacy/` still support
+opt-in debug logging. Set `AUGGIE_WARP_DEBUG=1` before launching Auggie:
 
 ```bash
 AUGGIE_WARP_DEBUG=1 auggie
 ```
 
-By default logs go to `/tmp/auggie-warp-debug.log`. Override the path
-with `AUGGIE_WARP_DEBUG_LOG=/path/to/log`. Each entry records the hook
-name, PID, Warp env vars, and the JSON payload on a separate `[stdin]`
-line.
+Logs go to `/tmp/auggie-warp-debug.log` (override with
+`AUGGIE_WARP_DEBUG_LOG=/path/to/log`).
 
 ## Uninstall
 
