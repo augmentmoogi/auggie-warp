@@ -16,8 +16,11 @@ Notifications appear in Warp's notification center and as system notifications, 
 ### 📡 Session Status
 
 The plugin keeps Warp informed of Auggie's current state by emitting structured events on every session transition:
-- **Prompt submitted** — you sent a prompt, Auggie is working
+- **Tool about to run** — Auggie is about to call a tool, session is active
 - **Tool completed** — a tool call finished, Auggie is back to running
+- **Turn ended** — Auggie finished its response
+
+Note: Auggie does not currently expose a turn-start hook event, so Warp's in-progress indicator only updates on turns that involve tool use. Pure-text replies (e.g., a one-line "hello") will not flip the indicator back to in-progress. This is an upstream Auggie limitation.
 
 This powers Warp's inline status indicators for Auggie sessions.
 
