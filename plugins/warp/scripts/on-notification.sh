@@ -4,9 +4,6 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-_LOG="/tmp/auggie-warp-debug.log"
-echo "[$(date '+%Y-%m-%d %H:%M:%S')] $(basename "$0") pid=$$ TERM_PROGRAM=${TERM_PROGRAM:-} WARP_PROTO=${WARP_CLI_AGENT_PROTOCOL_VERSION:-} WARP_VER=${WARP_CLIENT_VERSION:-}" >> "$_LOG"
-
 source "$SCRIPT_DIR/should-use-structured.sh"
 
 # Legacy fallback for old Warp versions
@@ -19,7 +16,6 @@ source "$SCRIPT_DIR/build-payload.sh"
 
 # Read hook input from stdin
 INPUT=$(cat)
-echo "[stdin] $INPUT" >> "$_LOG"
 
 # Extract notification-specific fields
 NOTIF_TYPE=$(echo "$INPUT" | jq -r '.notification_type // "unknown"' 2>/dev/null)

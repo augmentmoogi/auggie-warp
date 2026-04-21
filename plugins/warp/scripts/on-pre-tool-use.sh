@@ -7,9 +7,6 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-_LOG="/tmp/auggie-warp-debug.log"
-echo "[$(date '+%Y-%m-%d %H:%M:%S')] $(basename "$0") pid=$$ TERM_PROGRAM=${TERM_PROGRAM:-} WARP_PROTO=${WARP_CLI_AGENT_PROTOCOL_VERSION:-} WARP_VER=${WARP_CLIENT_VERSION:-}" >> "$_LOG"
-
 source "$SCRIPT_DIR/should-use-structured.sh"
 
 # No legacy equivalent for this hook
@@ -21,7 +18,6 @@ source "$SCRIPT_DIR/build-payload.sh"
 
 # Read hook input from stdin
 INPUT=$(cat)
-echo "[stdin] $INPUT" >> "$_LOG"
 
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
 

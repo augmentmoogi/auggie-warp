@@ -3,7 +3,7 @@
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "startup|resume",
+        "matcher": ".*",
         "hooks": [
           {
             "type": "command",
@@ -14,6 +14,7 @@
     ],
     "Stop": [
       {
+        "matcher": ".*",
         "hooks": [
           {
             "type": "command",
@@ -24,6 +25,7 @@
     ],
     "Notification": [
       {
+        "matcher": ".*",
         "hooks": [
           {
             "type": "command",
@@ -34,6 +36,7 @@
     ],
     "PostToolUse": [
       {
+        "matcher": ".*",
         "hooks": [
           {
             "type": "command",
@@ -44,6 +47,7 @@
     ],
     "PreToolUse": [
       {
+        "matcher": ".*",
         "hooks": [
           {
             "type": "command",
