@@ -64,6 +64,35 @@ Older Warp clients that predate the structured notification protocol are still s
 
 Notifications work out of the box. To customize Warp's notification behavior (sounds, system notifications, etc.), see [Warp's notification settings](https://docs.warp.dev/features/notifications).
 
+## Troubleshooting
+
+### Notifications never appear
+
+Auggie only runs plugin hooks when the `enableHooks` feature flag is set.
+Add it to `~/.augment/settings.json`:
+
+```json
+{
+  "enableHooks": true
+}
+```
+
+Then restart Auggie (or run `/reload-plugins`).
+
+### Enable debug logs
+
+Set `AUGGIE_WARP_DEBUG=1` before launching Auggie to have every hook
+invocation append a line to the debug log:
+
+```bash
+AUGGIE_WARP_DEBUG=1 auggie
+```
+
+By default logs go to `/tmp/auggie-warp-debug.log`. Override the path
+with `AUGGIE_WARP_DEBUG_LOG=/path/to/log`. Each entry records the hook
+name, PID, Warp env vars, and the JSON payload on a separate `[stdin]`
+line.
+
 ## Uninstall
 
 ```bash
