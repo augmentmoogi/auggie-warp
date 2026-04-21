@@ -25,8 +25,16 @@ echo "[stdin] $INPUT" >> "$_LOG"
 
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
 
+# ask-user means the agent is waiting for input (plan mode / permission).
+# Send "permission_request" so Warp shows the stop sign instead of "in progress".
+if [ "$TOOL_NAME" = "ask-user" ]; then
+    EVENT="permission_request"
+else
+    EVENT="prompt_submit"
+fi
+
 for _agent in auggie claude; do
-    BODY=$(build_payload "$INPUT" "prompt_submit" "$_agent" \
+    BODY=$(build_payload "$INPUT" "$EVENT" "$_agent" \
         --arg tool_name "$TOOL_NAME")
     "$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"
 done
