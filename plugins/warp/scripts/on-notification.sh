@@ -3,6 +3,13 @@
 # Sends a structured Warp notification when Auggie has been idle
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Opt-in debug logging (set AUGGIE_WARP_DEBUG=1)
+if [ -n "${AUGGIE_WARP_DEBUG:-}" ]; then
+    _LOG="${AUGGIE_WARP_DEBUG_LOG:-/tmp/auggie-warp-debug.log}"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $(basename "$0") pid=$$ TERM_PROGRAM=${TERM_PROGRAM:-} WARP_PROTO=${WARP_CLI_AGENT_PROTOCOL_VERSION:-} WARP_VER=${WARP_CLIENT_VERSION:-}" >> "$_LOG"
+fi
+
 source "$SCRIPT_DIR/should-use-structured.sh"
 
 # Legacy fallback for old Warp versions
@@ -15,6 +22,7 @@ source "$SCRIPT_DIR/build-payload.sh"
 
 # Read hook input from stdin
 INPUT=$(cat)
+[ -n "${AUGGIE_WARP_DEBUG:-}" ] && echo "[stdin] $INPUT" >> "${AUGGIE_WARP_DEBUG_LOG:-/tmp/auggie-warp-debug.log}"
 
 # Extract notification-specific fields
 NOTIF_TYPE=$(echo "$INPUT" | jq -r '.notification_type // "unknown"' 2>/dev/null)
