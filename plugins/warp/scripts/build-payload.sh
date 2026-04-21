@@ -48,7 +48,7 @@ build_payload() {
     # Extra args should be jq flag pairs like: --arg key "value" or --argjson key '{"a":1}'
     jq -nc \
         --argjson v "$protocol_version" \
-        --arg agent "auggie" \
+        --arg agent "claude" \
         --arg event "$event" \
         --arg session_id "$session_id" \
         --arg cwd "$cwd" \
