@@ -5,13 +5,14 @@
 #
 # Example:
 #   source "$(dirname "${BASH_SOURCE[0]}")/build-payload.sh"
-#   BODY=$(build_payload "$INPUT" "stop" \
+#   BODY=$(build_payload "$INPUT" "stop" "auggie" \
 #       --arg query "$QUERY" \
 #       --arg response "$RESPONSE" \
 #       --arg transcript_path "$TRANSCRIPT_PATH")
 #
 # The function extracts common fields (session_id, cwd, project) from the
 # hook's stdin JSON (passed as $1), then merges any extra jq args you pass.
+# The third positional arg is the agent identifier (defaults to "auggie").
 
 # The current protocol version this plugin knows how to produce.
 PLUGIN_CURRENT_PROTOCOL_VERSION=1
@@ -30,7 +31,11 @@ negotiate_protocol_version() {
 build_payload() {
     local input="$1"
     local event="$2"
+    local agent="${3:-auggie}"
     shift 2
+    # Consume the agent positional arg if it was provided (otherwise the
+    # remaining "$@" are the jq flag pairs for the caller).
+    [ $# -gt 0 ] && shift
 
     local protocol_version
     protocol_version=$(negotiate_protocol_version)
@@ -48,7 +53,7 @@ build_payload() {
     # Extra args should be jq flag pairs like: --arg key "value" or --argjson key '{"a":1}'
     jq -nc \
         --argjson v "$protocol_version" \
-        --arg agent "claude" \
+        --arg agent "$agent" \
         --arg event "$event" \
         --arg session_id "$session_id" \
         --arg cwd "$cwd" \

@@ -35,6 +35,8 @@ INPUT=$(cat)
 PLUGIN_VERSION=$(jq -r '.version // "unknown"' "$SCRIPT_DIR/../.augment-plugin/plugin.json" 2>/dev/null)
 
 # Emit structured notification with plugin version so Warp can track it
-BODY=$(build_payload "$INPUT" "session_start" \
-    --arg plugin_version "$PLUGIN_VERSION")
-"$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"
+for _agent in auggie claude; do
+    BODY=$(build_payload "$INPUT" "session_start" "$_agent" \
+        --arg plugin_version "$PLUGIN_VERSION")
+    "$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"
+done

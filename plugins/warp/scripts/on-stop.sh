@@ -73,9 +73,10 @@ if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
     fi
 fi
 
-BODY=$(build_payload "$INPUT" "stop" \
-    --arg query "$QUERY" \
-    --arg response "$RESPONSE" \
-    --arg transcript_path "$TRANSCRIPT_PATH")
-
-"$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"
+for _agent in auggie claude; do
+    BODY=$(build_payload "$INPUT" "stop" "$_agent" \
+        --arg query "$QUERY" \
+        --arg response "$RESPONSE" \
+        --arg transcript_path "$TRANSCRIPT_PATH")
+    "$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"
+done
