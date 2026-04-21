@@ -24,31 +24,10 @@
     ],
     "Notification": [
       {
-        "matcher": "idle_prompt",
         "hooks": [
           {
             "type": "command",
             "command": "${AUGMENT_PLUGIN_ROOT}/scripts/on-notification.sh"
-          }
-        ]
-      }
-    ],
-    "PermissionRequest": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${AUGMENT_PLUGIN_ROOT}/scripts/on-permission-request.sh"
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${AUGMENT_PLUGIN_ROOT}/scripts/on-prompt-submit.sh"
           }
         ]
       }
