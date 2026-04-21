@@ -42,8 +42,8 @@ build_payload() {
 
     # Extract common fields from the hook input
     local session_id cwd project
-    session_id=$(echo "$input" | jq -r '.session_id // empty' 2>/dev/null)
-    cwd=$(echo "$input" | jq -r '.cwd // empty' 2>/dev/null)
+    session_id=$(echo "$input" | jq -r '.conversation_id // empty' 2>/dev/null)
+    cwd=$(echo "$input" | jq -r '.workspace_roots[0] // empty' 2>/dev/null)
     project=""
     if [ -n "$cwd" ]; then
         project=$(basename "$cwd")

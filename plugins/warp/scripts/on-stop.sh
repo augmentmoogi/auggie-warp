@@ -24,59 +24,20 @@ source "$SCRIPT_DIR/build-payload.sh"
 INPUT=$(cat)
 [ -n "${AUGGIE_WARP_DEBUG:-}" ] && echo "[stdin] $INPUT" >> "${AUGGIE_WARP_DEBUG_LOG:-/tmp/auggie-warp-debug.log}"
 
-# Skip if a stop hook is already active (prevents double-notification)
-STOP_HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false' 2>/dev/null)
-if [ "$STOP_HOOK_ACTIVE" = "true" ]; then
-    exit 0
+QUERY=$(echo "$INPUT" | jq -r '._exchange.exchange.request_message // ""' 2>/dev/null)
+RESPONSE=$(echo "$INPUT" | jq -r '._exchange.exchange.response_text // ""' 2>/dev/null)
+
+# Truncate for notification display
+if [ -n "$QUERY" ] && [ ${#QUERY} -gt 200 ]; then
+    QUERY="${QUERY:0:197}..."
 fi
-
-# Extract the last user prompt and assistant response from the transcript.
-# Small delay to allow Auggie to flush the current turn to the transcript file.
-# The Stop hook fires before the transcript is fully written.
-TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null)
-sleep 0.3
-QUERY=""
-RESPONSE=""
-if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
-    # Get the last human prompt from the transcript.
-    # "user" type messages include both human prompts and tool-result messages.
-    # Human prompts have content that is either a plain string or an array
-    # containing {type:"text"} blocks. Tool-result messages have content arrays
-    # containing only {type:"tool_result"} blocks. We filter to messages that
-    # have at least one "text" block (or are a plain string).
-    QUERY=$(jq -rs '
-        [
-            .[] | select(.type == "user") |
-            if .message.content | type == "string" then .
-            elif [.message.content[] | select(.type == "text")] | length > 0 then .
-            else empty
-            end
-        ] | last |
-        if .message.content | type == "array"
-        then [.message.content[] | select(.type == "text") | .text] | join(" ")
-        else .message.content // empty
-        end
-    ' "$TRANSCRIPT_PATH" 2>/dev/null)
-
-    # Get the last assistant response
-    RESPONSE=$(jq -rs '
-        [.[] | select(.type == "assistant" and .message.content)] | last |
-        [.message.content[] | select(.type == "text") | .text] | join(" ")
-    ' "$TRANSCRIPT_PATH" 2>/dev/null)
-
-    # Truncate for notification display
-    if [ -n "$QUERY" ] && [ ${#QUERY} -gt 200 ]; then
-        QUERY="${QUERY:0:197}..."
-    fi
-    if [ -n "$RESPONSE" ] && [ ${#RESPONSE} -gt 200 ]; then
-        RESPONSE="${RESPONSE:0:197}..."
-    fi
+if [ -n "$RESPONSE" ] && [ ${#RESPONSE} -gt 200 ]; then
+    RESPONSE="${RESPONSE:0:197}..."
 fi
 
 for _agent in auggie claude; do
     BODY=$(build_payload "$INPUT" "stop" "$_agent" \
         --arg query "$QUERY" \
-        --arg response "$RESPONSE" \
-        --arg transcript_path "$TRANSCRIPT_PATH")
+        --arg response "$RESPONSE")
     "$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"
 done
