@@ -29,8 +29,6 @@ else
     EVENT="prompt_submit"
 fi
 
-for _agent in auggie claude; do
-    BODY=$(build_payload "$INPUT" "$EVENT" "$_agent" \
-        --arg tool_name "$TOOL_NAME")
-    "$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"
-done
+BODY=$(build_payload "$INPUT" "$EVENT" \
+    --arg tool_name "$TOOL_NAME")
+"$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"

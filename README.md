@@ -1,23 +1,6 @@
 # Auggie + Warp
 
-> ⚠️ **Spoofed Agent Name**
->
-> Warp currently only recognises `claude` as a CLI agent identifier. Until Warp
-> adds `auggie` to its allowlist, every notification is sent **twice** — once as
-> `auggie` and once as `claude` — so that Warp's status indicators work.
->
-> **To remove the spoof:** edit every `for _agent in auggie claude; do` loop in
-> the hook scripts under `plugins/warp/scripts/` and change it to
-> `for _agent in auggie; do`. The affected files are:
-> - `plugins/warp/scripts/on-session-start.sh`
-> - `plugins/warp/scripts/on-stop.sh`
-> - `plugins/warp/scripts/on-pre-tool-use.sh`
-> - `plugins/warp/scripts/on-notification.sh`
->
-> `plugins/warp/scripts/on-post-tool-use.sh` currently only sends as the
-> default agent (`auggie`).
-
-Official [Warp](https://warp.dev) terminal integration for [Auggie](https://docs.anthropic.com/en/docs/auggie).
+Official [Warp](https://warp.dev) terminal integration for [Auggie](https://docs.augmentcode.com/cli).
 
 ## Features
 
@@ -58,7 +41,7 @@ Once restarted, you'll see a confirmation message and notifications will appear 
 ## Requirements
 
 - [Warp terminal](https://warp.dev) (macOS, Linux, or Windows)
-- [Auggie](https://docs.anthropic.com/en/docs/auggie) CLI
+- [Auggie](https://docs.augmentcode.com/cli) CLI
 - `jq` for JSON parsing (install via `brew install jq` or your package manager)
 
 ## How It Works
@@ -67,13 +50,12 @@ The plugin communicates with Warp via OSC 777 escape sequences. Each hook script
 
 Payloads include a protocol version negotiated between the plugin and Warp (`min(plugin_version, warp_version)`), the session ID, working directory, and event-specific fields.
 
-The plugin registers six hooks:
+The plugin registers five hooks:
 - **SessionStart** — emits the plugin version and a welcome system message
-- **Stop** — reads the transcript to extract your prompt and Auggie's response, then sends a task-complete notification
-- **Notification** (`idle_prompt`) — fires when Auggie has been idle and needs your input
-- **PermissionRequest** — fires when Auggie wants to run a tool, includes the tool name and a preview of its input
-- **UserPromptSubmit** — fires when you submit a prompt, signaling the session is active again
-- **PostToolUse** — fires when a tool call completes, signaling the session is no longer blocked
+- **Stop** — extracts your prompt and Auggie's response, then sends a task-complete notification
+- **Notification** — fires when Auggie needs your input
+- **PreToolUse** — fires before a tool runs; sends `prompt_submit` to signal the session is active, or `permission_request` when Auggie is waiting for user input (e.g. `ask-user`)
+- **PostToolUse** — fires when a tool call completes
 
 ### Legacy Support
 

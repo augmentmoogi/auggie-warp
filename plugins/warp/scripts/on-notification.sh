@@ -22,8 +22,6 @@ NOTIF_TYPE=$(echo "$INPUT" | jq -r '.notification_type // "unknown"' 2>/dev/null
 MSG=$(echo "$INPUT" | jq -r '.notification_message // "Input needed"' 2>/dev/null)
 [ -z "$MSG" ] && MSG="Input needed"
 
-for _agent in auggie claude; do
-    BODY=$(build_payload "$INPUT" "$NOTIF_TYPE" "$_agent" \
-        --arg summary "$MSG")
-    "$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"
-done
+BODY=$(build_payload "$INPUT" "$NOTIF_TYPE" \
+    --arg summary "$MSG")
+"$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"

@@ -28,9 +28,7 @@ if [ -n "$RESPONSE" ] && [ ${#RESPONSE} -gt 200 ]; then
     RESPONSE="${RESPONSE:0:197}..."
 fi
 
-for _agent in auggie claude; do
-    BODY=$(build_payload "$INPUT" "stop" "$_agent" \
-        --arg query "$QUERY" \
-        --arg response "$RESPONSE")
-    "$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"
-done
+BODY=$(build_payload "$INPUT" "stop" \
+    --arg query "$QUERY" \
+    --arg response "$RESPONSE")
+"$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"
