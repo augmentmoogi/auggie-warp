@@ -17,10 +17,9 @@ Notifications appear in Warp's notification center and as system notifications, 
 
 The plugin keeps Warp informed of Auggie's current state by emitting structured events on every session transition:
 - **Tool about to run** — Auggie is about to call a tool, session is active
+- **Prompt submitted** — the user sent a message, Auggie is working
 - **Tool completed** — a tool call finished, Auggie is back to running
 - **Turn ended** — Auggie finished its response
-
-Note: Auggie does not currently expose a turn-start hook event, so Warp's in-progress indicator only updates on turns that involve tool use. Pure-text replies (e.g., a one-line "hello") will not flip the indicator back to in-progress. This is an upstream Auggie limitation.
 
 This powers Warp's inline status indicators for Auggie sessions.
 
@@ -50,11 +49,12 @@ The plugin communicates with Warp via OSC 777 escape sequences. Each hook script
 
 Payloads include a protocol version negotiated between the plugin and Warp (`min(plugin_version, warp_version)`), the session ID, working directory, and event-specific fields.
 
-The plugin registers five hooks:
+The plugin registers six hooks:
 - **SessionStart** — emits the plugin version and a welcome system message
+- **PromptSubmit** — fires when the user submits a prompt, signaling the session is active
 - **Stop** — extracts your prompt and Auggie's response, then sends a task-complete notification
 - **Notification** — fires when Auggie needs your input
-- **PreToolUse** — fires before a tool runs; sends `prompt_submit` to signal the session is active, or `permission_request` when Auggie is waiting for user input (e.g. `ask-user`)
+- **PreToolUse** — fires before a tool runs; sends `permission_request` when Auggie is waiting for user input (e.g. `ask-user`)
 - **PostToolUse** — fires when a tool call completes
 
 ### Legacy Support

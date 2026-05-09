@@ -55,6 +55,16 @@
           }
         ]
       }
+    ],
+    "PromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${AUGMENT_PLUGIN_ROOT}/scripts/on-prompt-submit.sh"
+          }
+        ]
+      }
     ]
   }
 }

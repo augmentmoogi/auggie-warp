@@ -1,9 +1,7 @@
 #!/bin/bash
 # Hook script for Auggie PreToolUse event
-# Sends a "prompt_submit" Warp notification before a tool call runs,
-# acting as a workaround for the missing UserPromptSubmit hook in Auggie.
-# This re-signals the running state so Warp's in-progress indicator
-# stays accurate on turns after the first one.
+# Detects when Auggie is waiting for user input (ask-user tool) and sends
+# a "permission_request" so Warp shows the stop sign / blocked indicator.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -24,11 +22,7 @@ TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
 # ask-user means the agent is waiting for input (plan mode / permission).
 # Send "permission_request" so Warp shows the stop sign instead of "in progress".
 if [ "$TOOL_NAME" = "ask-user" ]; then
-    EVENT="permission_request"
-else
-    EVENT="prompt_submit"
+    BODY=$(build_payload "$INPUT" "permission_request" \
+        --arg tool_name "$TOOL_NAME")
+    "$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"
 fi
-
-BODY=$(build_payload "$INPUT" "$EVENT" \
-    --arg tool_name "$TOOL_NAME")
-"$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"
