@@ -51,7 +51,7 @@ echo "=== build-payload.sh ==="
 
 echo ""
 echo "--- Common fields ---"
-PAYLOAD=$(build_payload '{"session_id":"sess-123","cwd":"/Users/alice/my-project"}' "stop")
+PAYLOAD=$(build_payload '{"conversation_id":"sess-123","workspace_roots":["/Users/alice/my-project"]}' "stop")
 assert_json_field "v is 1" "$PAYLOAD" ".v" "1"
 assert_json_field "agent is auggie" "$PAYLOAD" ".agent" "auggie"
 assert_json_field "event is stop" "$PAYLOAD" ".event" "stop"
@@ -68,7 +68,7 @@ assert_json_field "empty project" "$PAYLOAD" ".project" ""
 
 echo ""
 echo "--- Extra args are merged ---"
-PAYLOAD=$(build_payload '{"session_id":"s1","cwd":"/tmp/proj"}' "stop" \
+PAYLOAD=$(build_payload '{"conversation_id":"s1","workspace_roots":["/tmp/proj"]}' "stop" \
     --arg query "hello" \
     --arg response "world")
 assert_json_field "query merged" "$PAYLOAD" ".query" "hello"
@@ -77,7 +77,7 @@ assert_json_field "common fields still present" "$PAYLOAD" ".session_id" "s1"
 
 echo ""
 echo "--- Stop event ---"
-PAYLOAD=$(build_payload '{"session_id":"s1","cwd":"/tmp/proj"}' "stop" \
+PAYLOAD=$(build_payload '{"conversation_id":"s1","workspace_roots":["/tmp/proj"]}' "stop" \
     --arg query "write a haiku" \
     --arg response "Memory is safe, the borrow checker stands guard" \
     --arg transcript_path "/tmp/transcript.jsonl")
@@ -88,7 +88,7 @@ assert_json_field "transcript_path present" "$PAYLOAD" ".transcript_path" "/tmp/
 
 echo ""
 echo "--- Permission request event ---"
-PAYLOAD=$(build_payload '{"session_id":"s1","cwd":"/tmp/proj"}' "permission_request" \
+PAYLOAD=$(build_payload '{"conversation_id":"s1","workspace_roots":["/tmp/proj"]}' "permission_request" \
     --arg summary "Wants to run Bash: rm -rf /tmp" \
     --arg tool_name "Bash" \
     --argjson tool_input '{"command":"rm -rf /tmp"}')
@@ -99,14 +99,14 @@ assert_json_field "tool_input.command present" "$PAYLOAD" ".tool_input.command" 
 
 echo ""
 echo "--- Idle prompt event ---"
-PAYLOAD=$(build_payload '{"session_id":"s1","cwd":"/tmp/proj","notification_type":"idle_prompt"}' "idle_prompt" \
+PAYLOAD=$(build_payload '{"conversation_id":"s1","workspace_roots":["/tmp/proj"],"notification_type":"idle_prompt"}' "idle_prompt" \
     --arg summary "Auggie is waiting for your input")
 assert_json_field "event is idle_prompt" "$PAYLOAD" ".event" "idle_prompt"
 assert_json_field "summary present" "$PAYLOAD" ".summary" "Auggie is waiting for your input"
 
 echo ""
 echo "--- JSON special characters in values ---"
-PAYLOAD=$(build_payload '{"session_id":"s1","cwd":"/tmp/proj"}' "stop" \
+PAYLOAD=$(build_payload '{"conversation_id":"s1","workspace_roots":["/tmp/proj"]}' "stop" \
     --arg query 'what does "hello world" mean?' \
     --arg response 'It means greeting. Use: printf("hello")')
 assert_json_field "quotes in query preserved" "$PAYLOAD" ".query" 'what does "hello world" mean?'
@@ -117,17 +117,17 @@ echo "--- Protocol version negotiation ---"
 
 # Default: no env var set → falls back to plugin max (1)
 unset WARP_CLI_AGENT_PROTOCOL_VERSION
-PAYLOAD=$(build_payload '{"session_id":"s1","cwd":"/tmp"}' "stop")
+PAYLOAD=$(build_payload '{"conversation_id":"s1","workspace_roots":["/tmp"]}' "stop")
 assert_json_field "defaults to v1 when env var absent" "$PAYLOAD" ".v" "1"
 
 # Warp declares v1 → use 1
 export WARP_CLI_AGENT_PROTOCOL_VERSION=1
-PAYLOAD=$(build_payload '{"session_id":"s1","cwd":"/tmp"}' "stop")
+PAYLOAD=$(build_payload '{"conversation_id":"s1","workspace_roots":["/tmp"]}' "stop")
 assert_json_field "v1 when warp declares 1" "$PAYLOAD" ".v" "1"
 
 # Warp declares a higher version than the plugin knows → capped to plugin current
 export WARP_CLI_AGENT_PROTOCOL_VERSION=99
-PAYLOAD=$(build_payload '{"session_id":"s1","cwd":"/tmp"}' "stop")
+PAYLOAD=$(build_payload '{"conversation_id":"s1","workspace_roots":["/tmp"]}' "stop")
 assert_json_field "capped to plugin current when warp is ahead" "$PAYLOAD" ".v" "1"
 
 # Warp declares a lower version than the plugin knows → use warp's version
@@ -135,7 +135,7 @@ assert_json_field "capped to plugin current when warp is ahead" "$PAYLOAD" ".v" 
 # by temporarily overriding the variable)
 PLUGIN_CURRENT_PROTOCOL_VERSION=5
 export WARP_CLI_AGENT_PROTOCOL_VERSION=3
-PAYLOAD=$(build_payload '{"session_id":"s1","cwd":"/tmp"}' "stop")
+PAYLOAD=$(build_payload '{"conversation_id":"s1","workspace_roots":["/tmp"]}' "stop")
 assert_json_field "uses warp version when plugin is ahead" "$PAYLOAD" ".v" "3"
 PLUGIN_CURRENT_PROTOCOL_VERSION=1
 
